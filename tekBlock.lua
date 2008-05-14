@@ -1,5 +1,5 @@
 
-local MINOR = 1
+local MINOR = 2
 local lib = LibStub:NewLibrary("tekBlock", MINOR)
 if not lib then return end
 
@@ -37,13 +37,26 @@ function lib:new(dataobjname, db)
 		end
 
 
+		function self:SetDObjScript(event, name, key, value) self:SetScript(key, value) end
+	end
+
+	if self.init < 2 then
 		function self:TextUpdate(event, name, key, value)
 			self.text:SetText(value)
-			if self.db.resize then self:SetWidth(self.text:GetStringWidth() + 8) end
+			if self.db.resize then self:SetWidth(self.text:GetStringWidth() + 8 + (dataobj.icon and 24 or 0)) end
 		end
 
-
-		function self:SetDObjScript(event, name, key, value) self:SetScript(key, value) end
+		function self:IconUpdate(event, name, key, value)
+			local oldtexture = self.icon:GetTexture()
+			self.icon:SetTexture(value)
+			if not oldtexture then
+				self:SetWidth(self:GetWidth() + 24)
+				self.text:SetPoint("CENTER", 12, 0)
+			elseif not value then
+				self:SetWidth(self:GetWidth() - 24)
+				self.text:SetPoint("CENTER", 0, 0)
+			end
+		end
 	end
 
 	self.init = MINOR
@@ -72,10 +85,17 @@ function lib:new(dataobjname, db)
 	frame:SetScript("OnDragStart", self.OnDragStart)
 	frame:SetScript("OnDragStop", self.OnDragStop)
 
+	frame.icon = frame:CreateTexture()
+	frame.icon:SetWidth(16) frame.icon:SetHeight(16)
+	frame.icon:SetPoint("LEFT", 8, 0)
+	frame.icon:SetTexture(dataobj.icon)
+	frame.IconUpdate = self.IconUpdate
+	ldb.RegisterCallback(frame, "LibDataBroker_AttributeChanged_"..dataobjname.."_icon", "IconUpdate")
+
 	frame.text = frame:CreateFontString(nil, nil, "GameFontNormalSmall")
-	frame.text:SetPoint("CENTER")
+	frame.text:SetPoint("CENTER", dataobj.icon and 12 or 0, 0)
 	frame.text:SetText(dataobj.text or dataobjname)
-	frame:SetWidth(frame.text:GetStringWidth() + 8)
+	frame:SetWidth(frame.text:GetStringWidth() + 8 + (dataobj.icon and 24 or 0))
 	frame.TextUpdate = self.TextUpdate
 	ldb.RegisterCallback(frame, "LibDataBroker_AttributeChanged_"..dataobjname.."_text", "TextUpdate")
 
