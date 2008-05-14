@@ -72,8 +72,6 @@ function lib:new(dataobjname, db)
 	frame.db = db
 	frame:SetPoint("CENTER", UIParent, db.x and "BOTTOMLEFT" or "TOP", db.x or 0, db.y or -100)
 
---~ 	frame:EnableMouse(true)
---~ 	frame:RegisterForClicks("AnyUp")
 	frame:SetMovable(true)
 	frame:RegisterForDrag("LeftButton")
 	frame:SetClampedToScreen(true)
@@ -105,6 +103,11 @@ function lib:new(dataobjname, db)
 
 	frame:SetScript("OnLeave", dataobj.OnLeave)
 	ldb.RegisterCallback(frame, "LibDataBroker_AttributeChanged_"..dataobjname.."_OnLeave", "SetDObjScript")
+
+	frame:EnableMouse(true)
+	frame:RegisterForClicks("AnyUp")
+	frame:SetScript("OnClick", dataobj.OnClick)
+	ldb.RegisterCallback(frame, "LibDataBroker_AttributeChanged_"..dataobjname.."_OnClick", "SetDObjScript")
 
 	return frame
 end
